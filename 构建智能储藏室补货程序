@@ -1,0 +1,156 @@
+在本实验中，你将使用基本的 JavaScript 概念，如数组、对象、循环和条件式，构建一个小型储藏室管理程序。
+
+你将模拟接收一批储藏室物品，决定如何处理每一项物品，并将结果组织起来以便存储。
+
+目标： 完成以下用户故事并通过所有测试以完成实验。
+
+rawData 数组包含以管道符分隔的字串，格式为 sku|name|qty|expires|zone，其中 zone 是可选的。
+
+用户故事：
+
+你应该实现一个 parseShipment(rawData) 函数，该函数接受一个字串数组并返回一个具有 { sku, name, qty, expires, zone } 属性的对象数组。
+应忽略货物中重复的 sku。
+当货物字串中未提供 zone 时，应默认赋值为 "general"。
+qty 的值应转换为数字。
+你应该实现一个 planRestock(pantry, shipment) 函数，该函数比较当前储藏室与即将到货的货物，并以 { type, item } 形式返回一个动作数组，其中 type 是 "restock"、"discard" 或 "donate" 之一，item 是解析后的货物对象。
+
+pantry 参数是一个对象数组，形状与解析后的货物项相同（{ sku, name, qty, expires, zone }）。
+
+如果货物物品的 qty 为 0 或更少，动作 type 应为 "discard"，无论该物品是否存在于储藏室。
+否则，如果货物物品的 sku 已存在于储藏室，动作 type 应为 "restock"。
+否则（货物物品的 sku 不存在于储藏室），动作 type 应为 "donate"。
+你应该实现一个 groupByZone(actions) 函数，根据每个物品的 zone 属性将动作分组到存储区域。该函数应返回一个对象，其中每个键是区域名称，值是属于该区域的动作数组。例如，如果动作包含区域 "fridge" 和 "pantry" 的物品，结果应为 { fridge: [...], pantry: [...] }。
+
+你应该实现一个 clonePantry(pantry) 函数，返回储藏室的深拷贝，以便计划更改不会影响原始列表。深拷贝意味着创建一个包含新对象的新数组，因此修改副本不会改变原始储藏室。
+
+你应该将所有函数结合使用来处理一批货物，并将最终分组的结果对象记录到控制台。
+const pantry = [
+  { sku: "A10", name: "Tomatoes", qty: 4, expires: "2027-01-01", zone: "fridge" },
+  { sku: "D43", name: "Pineapples", qty: 2, expires: "2020-01-01", zone: "general" }
+];
+
+const rawData = [
+  "A10|Tomatoes|5|2027-01-01",
+  "B21|Bananas|10|2027-01-01",
+  "C32|Eggs|3|2027-01-01|fridge",
+  "C32|Eggs|3|2027-01-01",
+  "D43|Pineapples|0|2027-01-01",
+  "E54|Peppers|-1|2027-01-01|fridge"
+];
+/**
+ * 解析到货原始数据，返回标准化物品数组，自动去重sku
+ * @param {string[]} rawData - 管道分隔字符串数组 sku|name|qty|expires|zone(可选)
+ * @returns {Array<{sku:string,name:string,qty:number,expires:string,zone:string}>}
+ */
+function parseShipment(rawData) {
+  const skuSet = new Set();
+  const result = [];
+
+  for (const str of rawData) {
+    // 按管道分割字段
+    const parts = str.split('|');
+    const sku = parts[0].trim();
+    // 重复sku直接跳过
+    if (skuSet.has(sku)) continue;
+
+    const name = parts[1].trim();
+    const qty = Number(parts[2].trim());
+    const expires = parts[3].trim();
+    // zone可选，无则默认general
+    const zone = parts[4]?.trim() || 'general';
+
+    skuSet.add(sku);
+    result.push({ sku, name, qty, expires, zone });
+  }
+  return result;
+}
+
+/**
+ * 生成补货/丢弃/捐赠动作清单
+ * @param {Array} pantry 当前库存数组
+ * @param {Array} shipment 解析后的到货物品数组
+ * @returns {Array<{type:string, item:object}>} 动作数组
+ */
+function planRestock(pantry, shipment) {
+  // 提取现有库存sku集合快速查询
+  const pantrySkuMap = new Set(pantry.map(item => item.sku));
+  const actions = [];
+
+  for (const item of shipment) {
+    let type;
+    // 数量≤0：丢弃
+    if (item.qty <= 0) {
+      type = 'discard';
+    } else if (pantrySkuMap.has(item.sku)) {
+      // sku已存在库存：补货
+      type = 'restock';
+    } else {
+      // 全新sku：捐赠
+      type = 'donate';
+    }
+    actions.push({ type, item });
+  }
+  return actions;
+}
+
+/**
+ * 按zone区域对动作分组
+ * @param {Array} actions planRestock产出的动作数组
+ * @returns {Object} {zoneName: 对应动作数组}
+ */
+function groupByZone(actions) {
+  const group = {};
+  for (const action of actions) {
+    const zone = action.item.zone;
+    if (!group[zone]) {
+      group[zone] = [];
+    }
+    group[zone].push(action);
+  }
+  return group;
+}
+
+/**
+ * 库存深拷贝（数组+内部对象全新复制）
+ * @param {Array} pantry 原始库存数组
+ * @returns {Array} 完全独立的库存副本
+ */
+function clonePantry(pantry) {
+  // map生成新数组，展开对象生成全新item对象
+  return pantry.map(item => ({ ...item }));
+}
+
+// ====================== 主流程测试示例 ======================
+(function main() {
+  // 1. 模拟现有储藏室库存
+  const currentPantry = [
+    { sku: 'A001', name: '牛奶', qty: 5, expires: '2026-08-01', zone: 'fridge' },
+    { sku: 'B002', name: '大米', qty: 20, expires: '2027-01-01', zone: 'storage' },
+    { sku: 'C003', name: '饼干', qty: 12, expires: '2026-07-20', zone: 'general' }
+  ];
+
+  // 2. 模拟到货原始字符串数组（含重复sku、缺zone、负数数量）
+  const rawShipData = [
+    'A001|鲜牛奶|10|2026-08-15|fridge', // 已有sku，补货
+    'D004|矿泉水|30|2026-12-01', // 无zone，默认general，新sku捐赠
+    'B002|东北大米|-5|2027-02-01|storage', // 数量负数，丢弃
+    'D004|矿泉水|50|2026-12-01|drink', // 重复sku，自动忽略
+    'E005|罐头|8|2026-09-01|cabinet' // 全新sku捐赠
+  ];
+
+  // 步骤1：深拷贝库存，不污染原数据
+  const pantryCopy = clonePantry(currentPantry);
+
+  // 步骤2：解析到货数据
+  const shipmentItems = parseShipment(rawShipData);
+  console.log('解析后的到货物品：', shipmentItems);
+
+  // 步骤3：生成补货动作清单
+  const actionList = planRestock(pantryCopy, shipmentItems);
+  console.log('全部动作清单：', actionList);
+
+  // 步骤4：按区域分组
+  const zoneGroupResult = groupByZone(actionList);
+  console.log('===== 按区域分组最终结果 =====');
+  console.log(zoneGroupResult);
+})();
