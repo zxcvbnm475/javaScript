@@ -1,0 +1,16 @@
+在本实验中，你将创建一个函数，从数组中移除所有假值。
+
+JavaScript 中的假值有 false、null、0、""、undefined、NaN。
+
+目标：完成以下用户故事并通过所有测试以完成实验。
+
+用户故事：
+
+你应该有一个 bouncer 函数，它接受一个数组作为参数。
+bouncer 函数应返回一个新建的数组，该数组包含作为参数传入的数组中的相同元素，但已移除假值元素。
+bouncer 函数不应更改作为参数传入的数组。
+提示：可以考虑将每个值都转换为布尔值（boolean）。
+解法一
+function bouncer(arr) {
+  return arr.filter(item => Boolean(item));
+}
