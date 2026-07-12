@@ -1,0 +1,38 @@
+**目标：**实现以下用户需求并通过所有测试以完成实验。
+
+用户故事：
+
+你应该有一个名为 pyramid 的函数，它接受三个参数。
+第一个参数应为表现你金字塔中要重复的模式字符的字串。
+第二个参数应为表现金字塔行数的整数。
+第三个参数应为布尔值。
+当第三个参数为 false 时，pyramid 函数应返回一个字串，其中模式字符被重复并排列成一个顶点朝上的金字塔形状。
+当第三个参数为 true 时，金字塔的顶点应朝下。
+顶点行应只有一个模式字符，其他每一行应比前一行多两个模式字符。
+每一行应以足够数量的空格开头，以使每行的中心字符位于同一列，且每行末尾不应有任何空格。
+金字塔应以换行字符开始和结束。
+例如，调用 pyramid("o", 4, false) 应该产生以下输出：
+
+
+   o
+  ooo
+ ooooo
+ooooooo
+
+function pyramid(char,rows,reversed){
+  let result=[]
+  if(!reversed){
+    for(let i=1;i<=rows;i++){
+      const space=" ".repeat(rows-i);
+      const symbol=char.repeat(2*i-1);
+      result.push(space+symbol);
+    }
+  }else{
+    for (let i=rows;i>=1;i--){
+      const space=" ".repeat(rows-i)
+      const symbol=char.repeat(2*i-1)
+      result.push(space+symbol)
+    }
+  }
+  return "\n"+result.join("\n")+"\n";
+}
