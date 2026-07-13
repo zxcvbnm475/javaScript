@@ -1,0 +1,89 @@
+在本实验中，你将构建一个库存管理程序，允许你添加、更新、查找和移除库存中的产品。你将使用一个对象数组来表现你的库存，其中每个对象将包含 name 和 quantity 作为密钥。
+
+**目标：**实现以下用户需求并通过所有测试以完成实验。
+
+用户故事：
+
+你应该声明一个名为 inventory 的空数组，用于保存具有键 name 且值为小写字串，以及键 quantity 且值为整数的产品对象。
+你应该创建一个名为 findProductIndex 的函数，该函数以产品名称作为其参数，并返回对应产品对象在 inventory 数组中的索引。该函数应始终使用产品名称的小写形式来执行查找。如果未找到产品，函数应返回 -1。
+你应该创建一个名为 addProduct 的函数，该函数以产品对象作为其参数。
+如果产品已经存在于库存中，addProduct 函数应通过将传入函数的数量添加到当前的 quantity 来更新其 quantity 值，并在控制台记录产品名称，后跟一个空格和 quantity updated。
+如果产品不在库存中，addProduct 函数应将产品推送到 inventory 数组，并将产品名称记录到控制台，后跟一个空格和 added to inventory。
+你应该创建一个名为 removeProduct 的函数，该函数以产品名称和数量作为其参数。
+removeProduct 函数应从库存中对应的产品对象中减去传入的数量，并将字串 Remaining <product-name> pieces: <product-quantity> 记录到控制台，其中 <product-name> 应替换为产品名称，<product-quantity> 应替换为产品数量。
+如果减法后的数量为零，removeProduct 应该从库存中移除该产品对象。如果库存中的数量不足以执行减法，removeProduct 函数应将字串 Not enough <product-name> available, remaining pieces: <product-quantity> 记录到控制台日志。
+如果要移除的产品不在库存中，removeProduct 函数应在控制台记录 <product-name> not found。
+注意： 为防止冲突，运行测试时仅保留用户故事中提到的日志。
+// 1. 声明空库存数组
+const inventory = [];
+
+/**
+ * 根据产品名称查找索引，忽略大小写，统一小写匹配
+ * @param {string} productName - 产品名称
+ * @returns {number} 索引，找不到返回-1
+ */
+function findProductIndex(productName) {
+  const targetName = productName.toLowerCase();
+  for (let i = 0; i < inventory.length; i++) {
+    if (inventory[i].name === targetName) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * 添加/更新产品库存
+ * @param {object} product - {name:字符串, quantity:数字}
+ */
+function addProduct(product) {
+  // 统一转为小写标准名称
+  const standardName = product.name.toLowerCase();
+  const targetIndex = findProductIndex(product.name);
+
+  if (targetIndex !== -1) {
+    // 产品已存在，累加数量
+    inventory[targetIndex].quantity += product.quantity;
+    console.log(`${standardName} quantity updated`);
+  } else {
+    // 不存在，存入小写name的新对象
+    const newItem = {
+      name: standardName,
+      quantity: product.quantity
+    };
+    inventory.push(newItem);
+    console.log(`${standardName} added to inventory`);
+  }
+}
+
+/**
+ * 移除指定数量产品
+ * @param {string} productName - 产品名称
+ * @param {number} num - 要移除的数量
+ */
+function removeProduct(productName, num) {
+  const standardName = productName.toLowerCase();
+  const targetIndex = findProductIndex(productName);
+
+  // 情况1：产品不存在
+  if (targetIndex === -1) {
+    console.log(`${standardName} not found`);
+    return;
+  }
+
+  const item = inventory[targetIndex];
+  // 情况2：库存不足
+  if (item.quantity < num) {
+    console.log(`Not enough ${standardName} available, remaining pieces: ${item.quantity}`);
+    return;
+  }
+
+  // 扣除数量
+  item.quantity -= num;
+  console.log(`Remaining ${standardName} pieces: ${item.quantity}`);
+
+  // 扣完为0则删除该商品
+  if (item.quantity === 0) {
+    inventory.splice(targetIndex, 1);
+  }
+}
