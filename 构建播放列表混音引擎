@@ -1,0 +1,200 @@
+在本实验中，你将构建一个程序，从多个听众提交的播放列表中创建一个混音播放列表。
+
+每个听众都会提供他们想听的歌曲列表。有些歌曲可能出现多次，有些艺术家可能出现次数过多。你的任务是逐步处理这些播放列表：将它们合并成一个列表，为每首歌评分，删除重复歌曲，限制同一艺术家的出现次数，然后创建最终的播放顺序。
+
+目标： 完成下面的用户故事并通过所有测试以完成实验。
+
+用户故事：
+
+你应该创建一个名为 flattenPlaylists 的函数，该函数接受一个播放列表数组，其中每个播放列表是包含以下属性的对象数组：trackId、artist、title、votes、bpm。如果输入不是数组，flattenPlaylists 应该返回一个空数组。已为你提供了一个示例播放列表，你可以用它来测试你的函数。
+
+flattenPlaylists 应该返回一个扁平的曲目对象数组，每个对象包含所有原始曲目属性以及一个 source 属性，该属性是一个数组，包含播放列表索引和曲目索引，表示曲目的来源位置。
+
+你应该创建一个名为 scoreTracks 的函数，该函数接受一个由 flattenPlaylists 返回的曲目对象数组（每个对象具有 trackId、artist、title、votes、bpm 和 source 属性），并返回一个新的曲目对象数组，每个对象添加了一个 score 属性，计算公式为：votes * 10 - Math.abs(bpm - 120)。
+
+你应该创建一个名为 dedupeTracks 的函数，该函数接受一个由 scoreTracks 返回的曲目对象数组，并返回一个新的数组，删除重复的 trackId 条目，只保留第一次出现的。
+
+你应该创建一个名为 enforceArtistQuota 的函数，该函数接受一个由 dedupeTracks 返回的曲目对象数组和一个表示每个艺术家最大允许出现次数的数字。该函数应返回一个新数组，确保没有艺术家出现次数超过给定数字，保留最早出现的。
+
+你应该创建一个名为 buildSchedule 的函数，该函数接受一个由 enforceArtistQuota 返回的曲目对象数组，并返回一个新的 { slot, trackId } 对象数组，其中 slot 是一个从 1 开始的索引，表示每首曲目在播放顺序中的位置。
+
+你应该创建一个名为 remixPlaylist 的函数，该函数接受一个播放列表数组和每个艺术家允许的最大出现次数。该函数应通过依次调用 { slot, trackId }、flattenPlaylists、scoreTracks、dedupeTracks 和 enforceArtistQuota，返回最终的播放调度数组，数组元素为 buildSchedule 对象。
+const playlists = [
+  [
+    {
+      trackId: "trk101",
+      artist: "Velvet Comet",
+      title: "Crimson Afterglow",
+      votes: 5,
+      bpm: 122
+    },
+    {
+      trackId: "trk102",
+      artist: "Neon Harbor",
+      title: "Static Horizon",
+      votes: 2,
+      bpm: 108
+    },
+    {
+      trackId: "trk103",
+      artist: "Lunar Arcade",
+      title: "Midnight Frequency",
+      votes: 4,
+      bpm: 128
+    }
+  ],
+  [
+    {
+      trackId: "trk201",
+      artist: "Solar Echo",
+      title: "Glass Skyline",
+      votes: 3,
+      bpm: 115
+    },
+    {
+      trackId: "trk202",
+      artist: "Velvet Comet",
+      title: "Satellite Hearts",
+      votes: 6,
+      bpm: 124
+    }
+  ]
+];
+/**
+ * 1. 扁平化多维播放列表，新增 source 来源标记
+ * @param {Array} playlists 二维播放列表数组
+ * @returns {Array} 一维曲目数组，携带 source: [playlistIndex, trackIndex]
+ */
+function flattenPlaylists(playlists) {
+  // 输入非数组直接返回空数组
+  if (!Array.isArray(playlists)) return [];
+  const flat = [];
+
+  for (let listIdx = 0; listIdx < playlists.length; listIdx++) {
+    const playlist = playlists[listIdx];
+    if (!Array.isArray(playlist)) continue;
+
+    for (let trackIdx = 0; trackIdx < playlist.length; trackIdx++) {
+      const track = playlist[trackIdx];
+      flat.push({
+        ...track,
+        source: [listIdx, trackIdx]
+      });
+    }
+  }
+  return flat;
+}
+
+/**
+ * 2. 为每首曲目计算 score 分数
+ * 公式：score = votes * 10 - Math.abs(bpm - 120)
+ * @param {Array} tracks flattenPlaylists 输出的曲目数组
+ * @returns {Array} 新增 score 属性的新曲目数组
+ */
+function scoreTracks(tracks) {
+  return tracks.map(track => {
+    const score = track.votes * 10 - Math.abs(track.bpm - 120);
+    return {
+      ...track,
+      score
+    };
+  });
+}
+
+/**
+ * 3. 根据 trackId 去重，仅保留第一次出现的曲目
+ * @param {Array} scoredTracks scoreTracks 输出数组
+ * @returns {Array} 无重复曲目数组
+ */
+function dedupeTracks(scoredTracks) {
+  const seenIds = new Set();
+  const unique = [];
+  for (const track of scoredTracks) {
+    if (!seenIds.has(track.trackId)) {
+      seenIds.add(track.trackId);
+      unique.push(track);
+    }
+  }
+  return unique;
+}
+
+/**
+ * 4. 限制同一艺术家最大出现次数，保留最早出现的曲目
+ * @param {Array} uniqueTracks dedupe 后的曲目数组
+ * @param {number} maxPerArtist 每位艺术家最大允许曲目数
+ * @returns {Array} 过滤后不超配额的曲目数组
+ */
+function enforceArtistQuota(uniqueTracks, maxPerArtist) {
+  const artistCounter = new Map();
+  const filtered = [];
+
+  for (const track of uniqueTracks) {
+    const artist = track.artist;
+    const currentCount = artistCounter.get(artist) || 0;
+    if (currentCount < maxPerArtist) {
+      filtered.push(track);
+      artistCounter.set(artist, currentCount + 1);
+    }
+  }
+  return filtered;
+}
+
+/**
+ * 5. 构建播放调度数组，slot 从 1 开始自增
+ * @param {Array} quotaTracks 配额过滤后的曲目数组
+ * @returns {Array<{slot: number, trackId: any}>}
+ */
+function buildSchedule(quotaTracks) {
+  return quotaTracks.map((track, index) => ({
+    slot: index + 1,
+    trackId: track.trackId
+  }));
+}
+
+/**
+ * 顶层混音入口函数，串联全流程
+ * @param {Array} playlists 原始多维播放列表
+ * @param {number} maxArtistLimit 单艺术家最大曲目上限
+ * @returns {Array<{slot, trackId}>} 最终播放调度列表
+ */
+function remixPlaylist(playlists, maxArtistLimit) {
+  const flat = flattenPlaylists(playlists);
+  const scored = scoreTracks(flat);
+  const deduped = dedupeTracks(scored);
+  const quotaLimited = enforceArtistQuota(deduped, maxArtistLimit);
+  const schedule = buildSchedule(quotaLimited);
+  return schedule;
+}
+
+// ====================== 测试示例 ======================
+// 模拟多听众播放列表
+const samplePlaylists = [
+  // 播放列表 0
+  [
+    { trackId: "t1", artist: "Adele", title: "Hello", votes: 15, bpm: 100 },
+    { trackId: "t2", artist: "Ed", title: "Shape", votes: 8, bpm: 125 }
+  ],
+  // 播放列表 1
+  [
+    { trackId: "t1", artist: "Adele", title: "Hello", votes: 15, bpm: 100 }, // 重复trackId
+    { trackId: "t3", artist: "Adele", title: "Skyfall", votes: 20, bpm: 110 },
+    { trackId: "t4", artist: "Adele", title: "Someone", votes: 12, bpm: 130 }
+  ]
+];
+
+// 每位艺术家最多允许2首歌
+const finalSchedule = remixPlaylist(samplePlaylists, 2);
+console.log("最终播放调度：", finalSchedule);
+/*
+输出结果解释：
+1. flatten 后 t1 出现两次，source 分别 [0,0] / [1,0]
+2. dedupe 只保留第一次 t1
+3. Adele 现有 t1、t3，第三首 t4 超过配额2被剔除
+4. 最终保留 t1, t2, t3
+输出：
+[
+  { slot: 1, trackId: 't1' },
+  { slot: 2, trackId: 't2' },
+  { slot: 3, trackId: 't3' }
+]
+*/
