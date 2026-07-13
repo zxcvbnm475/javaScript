@@ -1,0 +1,29 @@
+本实验是关于将字串中的特殊字符转换为对应的超文本标记语言实体。
+
+目标：完成以下用户故事并通过所有测试以完成实验。
+
+用户故事：
+
+你应该有一个 convertHTML 函数，它接受一个字串作为参数。
+convertHTML 函数应通过将参数字串中的特殊字符转换为其对应的超文本标记语言实体来返回一个新建字串。
+& 应转换为 &amp;。
+< 应转换为 &lt;。
+> 应转换为 &gt;。
+" 应转换为 &quot;。
+' 应转换为 &apos;。
+function convertHTML(str) {
+  // 依次替换所有特殊字符
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+// 测试示例
+console.log(convertHTML("Dolce & Gabbana")); 
+// Dolce &amp; Gabbana
+
+console.log(convertHTML("<div class='test'>\"Hello\"</div>"));
+// &lt;div class=&apos;test&apos;&gt;&quot;Hello&quot;&lt;/div&gt;
