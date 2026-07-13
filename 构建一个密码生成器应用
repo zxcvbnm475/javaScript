@@ -1,0 +1,27 @@
+在本实验中，你将通过创建一个随机密码生成器来练习使用函数。
+
+**目标：**实现以下用户需求并通过所有测试以完成实验。
+
+用户故事：
+
+你应该创建一个名为 generatePassword 的函数，该函数接受一个参数，表示生成密码的长度。你可以随意命名该参数。
+你的函数应返回一个表现随机生成密码的字串。你应该使用以下字串和不同的 Math 方法来帮助你返回一个包含随机字符的新字串：ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()。
+你应该定义一个名为 password 的变量，并将调用 generatePassword 函数且带有表示所需密码长度的数字参数的结果赋值给它。
+你应该有一个 console.log，它记录一个由连接消息 Generated password: 和 password 变量并以空格分隔的单个字串。
+
+function generatePassword(len) {
+    // 规定可用字符集
+    const charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+    let result = "";
+    // 循环生成对应长度的密码
+    for (let i = 0; i < len; i++) {
+        // Math.random() 取0~1随机小数，乘字符长度后向下取整得到随机下标
+        const randomIndex = Math.floor(Math.random() * charPool.length);
+        result += charPool[randomIndex];
+    }
+    return result;
+}
+const password = generatePassword(12);
+
+// 打印拼接后的提示信息
+console.log("Generated password: " + password);
