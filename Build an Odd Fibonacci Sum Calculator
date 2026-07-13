@@ -1,0 +1,29 @@
+在本实验中，你将构建一个奇数 Fibonacci 和计算器，用于计算所有小于或等于给定正整数的奇数 Fibonacci 数的和。
+
+目标：完成以下用户故事并通过所有测试以完成实验。
+
+User Stories:
+
+你应该有一个接受数字作为参数的 sumFibs 函数。
+sumFibs 函数应返回所有小于或等于给定数字的奇数斐波那契数的和。
+斐波那契序列以 0 和 1 开始，每个后续数字都是前两个数字的和。
+只有奇数的 Fibonacci 数应添加到总和中。
+function sumFibs(num) {
+  // 初始化斐波那契前两项：0, 1
+  let prevPrev = 0;
+  let prev = 1;
+  let sum = 0;
+
+  // 当前斐波那契数不超过num时循环
+  while (prev <= num) {
+    // 奇数则累加
+    if (prev % 2 !== 0) {
+      sum += prev;
+    }
+    // 生成下一个斐波那契数
+    const next = prevPrev + prev;
+    prevPrev = prev;
+    prev = next;
+  }
+  return sum;
+}
