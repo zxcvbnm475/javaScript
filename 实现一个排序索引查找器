@@ -1,0 +1,22 @@
+在本实验中，你将创建一个函数，该函数返回一个值在数组按升序排序后应插入的最低索引。
+目标：完成以下用户故事并通过所有测试以完成实验。
+用户故事：
+你应该有一个 getIndexToIns 函数，它接受两个参数：一个数组和一个数字。
+
+你应该使用 sort 方法将数组按升序排序。
+
+你的 getIndexToIns 函数应通过使用 findIndex 方法返回数字应插入的最低索引。
+
+你的 getIndexToIns 函数应始终返回一个数字。
+
+提示：findIndex 方法是 JavaScript 中的内置数组方法。它接受一个回调函数并返回第一个满足条件的元素的索引。findIndex 和 sort 都是高阶函数。
+function getIndexToIns(arr, num) {
+  // 复制数组并升序排序
+  const sortedArr = [...arr].sort((a, b) => a - b);
+  
+  // 找到第一个 >= num 的元素索引
+  const index = sortedArr.findIndex(item => item >= num);
+
+  // 没找到返回数组长度，找到就返回index
+  return index === -1 ? sortedArr.length : index;
+}
