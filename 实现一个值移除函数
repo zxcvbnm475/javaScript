@@ -1,0 +1,11 @@
+在本实验中，你将创建一个函数，该函数以初始数组作为第一个参数，后跟一个或多个表示要移除值的附加参数。
+目标：完成以下用户故事并通过所有测试以完成实验。
+用户故事：
+你应该有一个 destroyer 函数，它接受一个数组和一个或多个额外的参数。
+
+destroyer 函数应返回一个新建数组，排除第一个参数中与后续任何参数匹配的所有元素。
+
+该函数必须接受不确定数量的参数。
+function destroyer(arr, ...valsToRemove) {
+  return arr.filter(item => !valsToRemove.includes(item));
+}
