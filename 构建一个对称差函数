@@ -1,0 +1,24 @@
+比较两个数组并返回一个新数组，包含所有只在其中一个数组中出现的元素，排除两个数组都存在的元素。 换言之，我们需要返回两个数组的对称差。
+例如：
+数组 A：["diamond", "stick", "apple"]
+数组 B：["stick", "emerald", "bread"]
+结果：["diamond", "apple", "emerald", "bread"]
+目标：实现以下用户需求并通过所有测试以完成实验。
+用户故事：
+你的函数 diffArray 应该返回一个数组。
+
+你的函数应接受两个参数，这两个参数都是数组。
+
+你的函数应使用 filter 方法。
+
+你的函数应返回两个数组的对称差集。
+
+如果没有对称差异，你的函数应返回一个空数组。
+function diffArray(arr1, arr2) {
+  // 在arr1中筛选：不存在于arr2的元素
+  const onlyArr1 = arr1.filter(item => !arr2.includes(item));
+  // 在arr2中筛选：不存在于arr1的元素
+  const onlyArr2 = arr2.filter(item => !arr1.includes(item));
+  // 合并两部分结果
+  return [...onlyArr1, ...onlyArr2];
+}
