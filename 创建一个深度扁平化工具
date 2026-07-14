@@ -1,0 +1,31 @@
+在本实验中，你将实现一个数组扁平化算法。
+
+扁平化数组意味着将任意深度的嵌套数组转换为单一的一维数组。该进程按顺序提取所有元素，仅展开数组。其他类型保持不变。
+
+例如：
+
+Original	Flattened
+[[1], [], [2, [3]]]	[1, 2, 3]
+[1, {"foo": "bar"}, [2]]	[1, {"foo": "bar"}, 2]
+["baz", [1, 2], {}]	["baz", 1, 2, {}]
+**目标：**实现以下用户需求并通过所有测试以完成实验。
+
+用户故事：
+
+你应该有一个名为 steamrollArray 的函数。
+steamrollArray 函数应接受一个参数：嵌套数组。
+该函数应展平嵌套数组，考虑不同层级的嵌套。
+代码中不应使用 Array.prototype.flat() 或 Array.prototype.flatMap() 方法。
+不应使用全局变量。
+function steamrollArray(arr) {
+  const result = [];
+  for (const item of arr) {
+    if (Array.isArray(item)) {
+      // 递归展开子数组，把结果推进最终数组
+      result.push(...steamrollArray(item));
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
+}
