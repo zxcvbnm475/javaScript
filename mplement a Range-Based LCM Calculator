@@ -1,0 +1,33 @@
+在本实验中，你将创建一个函数，该函数接受一个包含两个数字的数组，并返回这两个数字及其之间所有数字的最小公倍数（LCM）。
+目标：完成以下用户故事并通过所有测试以完成实验。
+User Stories:
+你应该有一个 smallestCommons 函数，它接受一个包含两个数字的数组作为参数。
+
+smallestCommons 函数应返回能够被两个数字及它们之间范围内所有循序数字整除的最小公倍数。
+
+该函数应处理两个数字不按数值顺序排列的输入。
+function smallestCommons(arr) {
+  // 1. 获取区间最小值、最大值，处理乱序
+  let min = Math.min(arr[0], arr[1]);
+  let max = Math.max(arr[0], arr[1]);
+
+  // 最大公约数 GCD (欧几里得算法)
+  function gcd(a, b) {
+    while (b) {
+      [a, b] = [b, a % b];
+    }
+    return a;
+  }
+
+  // 两数最小公倍数 LCM
+  function lcm(a, b) {
+    return (a * b) / gcd(a, b);
+  }
+
+  // 迭代求区间整体LCM
+  let result = min;
+  for (let i = min + 1; i <= max; i++) {
+    result = lcm(result, i);
+  }
+  return result;
+}
